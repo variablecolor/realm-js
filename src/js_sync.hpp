@@ -49,7 +49,6 @@ extern jclass ssl_helper_class;
 #include <condition_variable>
 
 namespace realm {
-class Adapter;
 
 namespace js {
 template<typename T>
@@ -64,43 +63,14 @@ inline realm::SyncManager& syncManagerShared(typename T::Context &ctx) {
             user_agent_binding_info = js::Value<T>::validated_to_string(ctx, result);
         }
         ensure_directory_exists_for_file(default_realm_file_directory());
-        SyncManager::shared().configure(default_realm_file_directory(), SyncManager::MetadataMode::NoEncryption, user_agent_binding_info);
+        SyncClientConfig client_config;
+        client_config.base_file_path = default_realm_file_directory();
+        client_config.metadata_mode = SyncManager::MetadataMode::NoEncryption;
+        client_config.user_agent_binding_info = user_agent_binding_info;
+        SyncManager::shared().configure(client_config);
     });
     return SyncManager::shared();
 }
-
-template<typename T>
-class AdapterClass : public ClassDefinition<T, Adapter> {
-    using GlobalContextType = typename T::GlobalContext;
-    using ContextType = typename T::Context;
-    using FunctionType = typename T::Function;
-    using ObjectType = typename T::Object;
-    using ValueType = typename T::Value;
-    using String = js::String<T>;
-    using Object = js::Object<T>;
-    using Value = js::Value<T>;
-    using Function = js::Function<T>;
-    using ReturnValue = js::ReturnValue<T>;
-    using Arguments = js::Arguments<T>;
-
-
-public:
-    std::string const name = "Adapter";
-
-    static void constructor(ContextType, ObjectType, Arguments &);
-
-    static void current(ContextType, ObjectType, Arguments &, ReturnValue &);
-    static void advance(ContextType, ObjectType, Arguments &, ReturnValue &);
-    static void realm_at_path(ContextType, ObjectType, Arguments &, ReturnValue &);
-    static void close(ContextType, ObjectType, Arguments &, ReturnValue &);
-
-    MethodMap<T> const methods = {
-        {"current", wrap<current>},
-        {"advance", wrap<advance>},
-        {"realmAtPath", wrap<realm_at_path>},
-        {"close", wrap<close>},
-    };
-};
 
 using SharedUser = std::shared_ptr<realm::SyncUser>;
 using WeakSession = std::weak_ptr<realm::SyncSession>;
@@ -997,9 +967,6 @@ inline typename T::Function SyncClass<T>::create_constructor(ContextType ctx) {
     PropertyAttributes attributes = ReadOnly | DontEnum | DontDelete;
     Object::set_property(ctx, sync_constructor, "User", ObjectWrap<T, UserClass<T>>::create_constructor(ctx), attributes);
     Object::set_property(ctx, sync_constructor, "Session", ObjectWrap<T, SessionClass<T>>::create_constructor(ctx), attributes);
-#if REALM_PLATFORM_NODE
-    Object::set_property(ctx, sync_constructor, "Adapter", ObjectWrap<T, AdapterClass<T>>::create_constructor(ctx), attributes);
-#endif
 
     return sync_constructor;
 }
@@ -1009,7 +976,11 @@ void SyncClass<T>::initialize_sync_manager(ContextType ctx, ObjectType this_obje
     args.validate_count(1);
     std::string user_agent_binding_info = Value::validated_to_string(ctx, args[0]);
     ensure_directory_exists_for_file(default_realm_file_directory());
-    SyncManager::shared().configure(default_realm_file_directory(), SyncManager::MetadataMode::NoEncryption, user_agent_binding_info);
+    SyncClientConfig client_config;
+    client_config.base_file_path = default_realm_file_directory();
+    client_config.metadata_mode = SyncManager::MetadataMode::NoEncryption;
+    client_config.user_agent_binding_info = user_agent_binding_info;
+    SyncManager::shared().configure(client_config);
 }
 
 template<typename T>
@@ -1384,7 +1355,7 @@ void SyncClass<T>::local_listener_realms(ContextType ctx, ObjectType this_object
     std::vector<std::string> local_realms;
     for (auto& obj : table) {
         auto virtual_path = obj.get<StringData>(path_col_key);
-        GlobalKey id = obj.get_object_id();
+        auto id = obj.get_object_id();
         std::string file_path = util::format("%1/realms%2/%3.realm", local_root_dir, virtual_path, id.to_string());
 
         // filter out Realms not present locally

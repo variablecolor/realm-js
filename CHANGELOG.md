@@ -1,5 +1,8 @@
 x.x.x Release notes (yyyy-MM-dd)
 =============================================================
+### Breaking changes
+* `Realm.Sync.Adapter`, `Realm.Sync.addlistener()`, `Realm.Sync.localListenerRealms()`, `Realm.Sync.removeAllListeners()` and `Realm.Sync.removeListener()` have been removed. ([RJS-434](https://jira.mongodb.org/browse/RJS-434))
+
 ### Enhancements
 * Add support for the new `Decimal128` data type. ([#2674](https://github.com/realm/realm-js/issues/2674))
 * Add support for the new `ObjectId` data type. ([#2675](https://github.com/realm/realm-js/issues/2675))
@@ -17,6 +20,30 @@ x.x.x Release notes (yyyy-MM-dd)
 * Updated Realm Core from ??? to Realm Core v6.1.0-alpha.3.
 * Updated Realm Sync from ??? to Realm Sync v5.1.0-alpha.1.
 * Updated Realm Object Store to commit 9a0a22b25e93786a61da90e7a9f7e94bb4291000.
+
+x.x.x Release notes (yyyy-MM-dd)
+=============================================================
+### Breaking changes
+* The notification callbacks from Realm.Sync.addListener have changed the format of ChangeEvent.changes() to pass out Realm objects instead of just the internal object ids. The objects associated with the `ChangeEvent.newRealm()` are `insertions`, and `newModifications` while the objects from `ChangeEvent.oldRealm()` are `deletions`, and `oldModifications`. The ambiguous `modifications` has been removed.
+
+### Enhancements
+* None.
+
+### Fixed
+* <How to hit and notice issue? what was the impact?> ([#????](https://github.com/realm/realm-js/issues/????), since v?.?.?)
+* None.
+
+### Compatibility
+* Realm Object Server: 3.23.1 or later.
+* APIs are backwards compatible with all previous release of Realm JavaScript in the 4.x.y series.
+* File format: generates Realms with format v10 (reads and upgrades file format v5 or later).
+
+### Internal
+* Updated Realm Core v6.0.0-beta.3 to v6.0.1.
+* Updated Realm Sync v5.0.0-beta.2 to v5.0.0.
+* Updated Realm Object Store to commit e3ac880ea2a6d1ea52d93f072ea8542a2ffaf9f9.
+* Updated OpenSSL from v1.0.2k to v1.1.1b (ReactNative Android).
+* Switched to Android NDK r21 for Android builds. ([#2229](https://github.com/realm/realm-js/issues/2229))
 
 4.0.0-beta.1 Release notes (2020-1-7)
 =============================================================
@@ -120,6 +147,59 @@ NOTE: The following methods have been removed in later versions.
 * Updated to Realm Core v6.0.0-alpha.23.
 * Updated to Realm Sync v4.7.1-core6.4.
 
+3.6.x Release notes (yyyy-MM-dd)
+=============================================================
+### Enhancements
+* None.
+
+### Fixed
+* Connecting via SSL would crash on iOS 11.x due to an incorrect version availability check around an API introduced in iOS 12. ([realm/realm-sync#3230](https://github.com/realm/realm-sync/pull/3230), since v3.6.2).
+
+### Compatibility
+* Realm Object Server: 3.23.1 or later.
+* APIs are backwards compatible with all previous release of realm in the 2.x.y series.
+* File format: Generates Realms with format v9 (Reads and upgrades all previous formats)
+
+### Internal
+* Updated Realm Sync from v4.9.4 to v4.9.5.
+
+3.6.3 Release notes (2020-1-17)
+=============================================================
+### Enhancements
+* None.
+
+### Fixed
+* Added missing `Realm.Sync.ClientResyncMode` constants. ([#2690](https://github.com/realm/realm-js/issues/2690), since v3.1.0)
+* Untrusted SSL certificates were treated as transient rather than fatal errors on Apple platforms. (since v3.6.2)
+* On React Native, when using libraries that define the `atob` global, users would experience our library incorrectly assuming it was running via the remote (Chrome) debugger. ([#2294](https://github.com/realm/realm-js/issues/2294), since v2.0.3)
+
+### Compatibility
+* Realm Object Server: 3.23.1 or later.
+* APIs are backwards compatible with all previous release of realm in the 2.x.y series.
+* File format: Generates Realms with format v9 (Reads and upgrades all previous formats)
+
+### Internal
+* Updated Realm Sync from v4.9.3 to v4.9.4.
+
+3.6.2 Release notes (2020-1-16)
+=============================================================
+### Enhancements
+* None.
+
+### Fixed
+* Fixed a bug that prevented `ClientResyncMode.Discard` to discard the local changes. ([#2664](https://github.com/realm/realm-js/issues/2664), since v3.1.0)
+* Fixed a bug where properties with float and double values would not be sorted correctly. ([realm/realm-core#3520](https://github.com/realm/realm-core/pull/3520), since v3.6.0)
+  * Fixed a bug where a `NOT` query on a list would incorrectly match objects which have an object index one less than a correctly matching object which appeared earlier in the list. ([realm/realm-cocoa#6289](https://github.com/realm/realm-cocoa/issues/6289), since v1.0.0)
+
+### Compatibility
+* Realm Object Server: 3.23.1 or later.
+* APIs are backwards compatible with all previous release of realm in the 2.x.y series.
+* File format: Generates Realms with format v9 (Reads and upgrades all previous formats)
+
+### Internal
+* Upgraded Realm Core from v5.23.7 to v5.23.8.
+* Upgraded Realm Sync from v4.9.1 to v4.9.3.
+
 3.6.0 Release notes (2019-12-11)
 =============================================================
 ### Enhancements
@@ -132,8 +212,15 @@ NOTE: The following methods have been removed in later versions.
 
 ### Compatibility
 * Realm Object Server: 3.23.1 or later.
-* APIs are backwards compatible with all previous release of Realm JavaScript in the 4.x.y series.
-* File format: generates Realms with format v10 (reads and upgrades file format v5 or later).
+* APIs are backwards compatible with all previous release of realm in the 2.x.y series.
+* File format: Generates Realms with format v9 (Reads and upgrades all previous formats)
+
+### Internal
+* Fixed download URLs to make it possible to build without sync. ([RJS-355](https://jira.mongodb.org/browse/RJS-355))
+* Now explicitly (deleting and re-)creating a "realm-js-integration-tests" simulator when running the React Native iOS integration tests.
+* Updated Realm Core from v5.23.6 to v5.23.7.
+* Updated Realm Sync from v4.9.0 to v4.9.1.
+* Updated Realm Object Store to commit 8c274c2dbb2b6da67cd95707e39da4597993f938.
 
 3.5.0 Release notes (2019-12-2)
 =============================================================

@@ -34,6 +34,7 @@
         "src/object-store/src/index_set.cpp",
         "src/object-store/src/list.cpp",
         "src/object-store/src/object.cpp",
+        "src/object-store/src/object_changeset.cpp",
         "src/object-store/src/object_schema.cpp",
         "src/object-store/src/object_store.cpp",
         "src/object-store/src/placeholder.cpp",
@@ -62,6 +63,7 @@
         "src/object-store/src/list.hpp",
         "src/object-store/src/object.hpp",
         "src/object-store/src/object_accessor.hpp",
+        "src/object-store/src/object_changeset.hpp",
         "src/object-store/src/object_schema.hpp",
         "src/object-store/src/object_store.hpp",
         "src/object-store/src/property.hpp",
@@ -203,13 +205,7 @@
           "libraries": [ "-lrealm-sync<(debug_library_suffix)" ],
           "conditions": [
               ["OS=='win'", {
-                "conditions": [
-                  ["target_arch=='ia32'", {
-                    "libraries": [ "C:\\Program Files (x86)\\Windows Kits\\8.1\\Lib\\winv6.3\\um\\x86\\mincore.lib" ]
-                  }, {
-                    "libraries": [ "C:\\Program Files (x86)\\Windows Kits\\8.1\\Lib\\winv6.3\\um\\x64\\mincore.lib" ]
-                  }]
-                ]
+                "libraries": [ "Mincore.lib" ]
               }]
           ]
       },
