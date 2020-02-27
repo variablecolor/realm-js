@@ -1,5 +1,7 @@
 x.x.x Release notes (yyyy-MM-dd)
 =============================================================
+NOTE: MacOS v10.14 (Mojave) is required for node add-on.
+
 ### Breaking changes
 * `Realm.Sync.Adapter`, `Realm.Sync.addlistener()`, `Realm.Sync.localListenerRealms()`, `Realm.Sync.removeAllListeners()` and `Realm.Sync.removeListener()` have been removed. ([RJS-434](https://jira.mongodb.org/browse/RJS-434))
 
