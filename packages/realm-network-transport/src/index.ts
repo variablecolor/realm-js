@@ -3,5 +3,7 @@ export {
     NetworkTransport,
     Request,
     Response,
-    Method
+    Method,
+    SuccessCallback,
+    ErrorCallback
 } from "./NetworkTransport";
