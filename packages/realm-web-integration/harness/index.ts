@@ -10,31 +10,6 @@ import WEBPACK_CONFIG = require("../webpack.config");
 const devtools = "DEV_TOOLS" in process.env;
 
 async function run() {
-    let devServer: WebpackDevServer | null = null;
-    let mochaServer: MochaRemoteServer | null = null;
-    let browser: puppeteer.Browser | null = null;
-
-    async function shutdown() {
-        if (browser && !devtools) {
-            await browser.close();
-        }
-        // Shut down the Mocha remote server
-        if (mochaServer) {
-            await mochaServer.stop();
-        }
-        // Shut down the dev server
-        await new Promise(resolve =>
-            devServer ? devServer.close(resolve) : resolve()
-        );
-    }
-
-    process.once("exit", () => {
-        shutdown().then(null, err => {
-            // tslint:disable-next-line:no-console
-            console.error(`Error shutting down: ${err}`);
-        });
-    });
-
     // Prepare
     const { appId, baseUrl } = await importRealmApp();
     // Start up the Webpack Dev Server
@@ -50,10 +25,13 @@ async function run() {
             })
         ]
     });
+
+    // Start the webpack-dev-server
+    const devServer = new WebpackDevServer(compiler, {
+        proxy: { "/api": baseUrl }
+    });
+
     await new Promise((resolve, reject) => {
-        devServer = new WebpackDevServer(compiler, {
-            proxy: { "/api": baseUrl }
-        });
         devServer.listen(8080, "localhost", err => {
             if (err) {
                 reject(err);
@@ -62,15 +40,36 @@ async function run() {
             }
         });
     });
+
+    process.once("exit", () => {
+        devServer.close();
+    });
+
     // Start the mocha remote server
-    mochaServer = new MochaRemoteServer();
+    const mochaServer = new MochaRemoteServer(undefined, {
+        runOnConnection: true,
+        // Only stop after completion if we're not showing dev-tools
+        stopAfterCompletion: !devtools
+    });
+
+    process.once("exit", () => {
+        mochaServer.stop();
+    });
+
+    await mochaServer.start();
+
     // Start up the browser, running the tests
-    browser = await puppeteer.launch({ devtools });
+    const browser = await puppeteer.launch({ devtools });
+
+    process.once("exit", () => {
+        browser.close();
+    });
+
     // Navigate to the pages served by the webpack dev server
     const page = await browser.newPage();
     await page.goto("http://localhost:8080");
-    // Start running the remote tests
-    await mochaServer.runAndStop();
+    // Wait for the tests to complete
+    await mochaServer.stopped;
 }
 
 run().then(

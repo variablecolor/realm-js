@@ -5,7 +5,7 @@
 		"moduleResolution": "node",
 		"noEmit": true,
 		"forceConsistentCasingInFileNames": true,
-		"types": ["realm-network-transport", "mocha", "chai", "node"],
+		"types": ["realm-network-transport", "mocha", "chai", "node", "bson"],
 		"lib": ["ES2015", "DOM"]
 	},
 	"include": ["src/**/*.ts", "types/app.d.ts"]

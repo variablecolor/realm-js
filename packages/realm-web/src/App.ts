@@ -1,7 +1,9 @@
+import { NetworkTransport } from "realm-network-transport";
+
 import { create as createFunctionsFactory } from "./FunctionsFactory";
 import { User, UserState, UserControlHandle } from "./User";
-import { NetworkTransport } from "realm-network-transport";
 import { AuthenticatedTransport, Transport, BaseTransport } from "./transports";
+import { create as createServicesFactory } from "./services";
 
 export interface AppConfiguration extends Realm.AppConfiguration {
     /** Transport to use when fetching resources */
@@ -12,23 +14,25 @@ export interface AppConfiguration extends Realm.AppConfiguration {
  * MongoDB Realm App
  */
 export class App<FF extends Realm.FunctionsFactory> implements Realm.App {
-    public readonly functions: FF;
+    /** App id, obtained through the MongoDB Realm UI. */
     public readonly id: string;
-    public readonly baseRoute = "/api/client/v2.0";
 
-    /**
-     * Default base url to prefix all requests if no baseUrl is specified in the configuration.
-     */
+    /** Access remote functions as members of this functions factory. */
+    public readonly functions: FF;
+
+    /** Access remote services as members of this services factory. */
+    public readonly services: Realm.Services.ServicesFactory;
+
+    /** Default base url to prefix all requests if no baseUrl is specified in the configuration. */
     public static DEFAULT_BASE_URL = "https://stitch.mongodb.com";
 
-    /**
-     * A transport adding the base route prefix to all requests
-     */
+    /** Default API base route used as a prefix to the path of all requests. */
+    public static DEFAULT_BASE_ROUTE = "/api/client/v2.0";
+
+    /** A transport adding the base route prefix to all requests. */
     private readonly baseTransport: Transport;
 
-    /**
-     * A transport adding the base and app route prefix to all requests
-     */
+    /** A transport adding the base and app route prefix to all requests. */
     private readonly appTransport: Transport;
 
     /**
@@ -58,12 +62,14 @@ export class App<FF extends Realm.FunctionsFactory> implements Realm.App {
             this,
             baseUrlTransport
         );
-        this.baseTransport = authTransport.prefix(this.baseRoute);
+        this.baseTransport = authTransport.prefix(App.DEFAULT_BASE_ROUTE);
         this.appTransport = this.baseTransport.prefix(`/app/${this.id}`);
         // Construct the functions factory
         this.functions = createFunctionsFactory<FF>({
             transport: this.appTransport
         });
+        // Construct the services factory
+        this.services = createServicesFactory(this.appTransport);
     }
 
     /**

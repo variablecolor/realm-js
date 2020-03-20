@@ -16,6 +16,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
+/// <reference path="services.d.ts" />
+
 declare namespace Realm {
     /**
      * The constructor of MongoDB Realm App.
@@ -35,9 +37,14 @@ declare namespace Realm {
         id: string;
 
         /**
-         * Use this to call functions defined on the MongoDB Realm server.
+         * Use this to call functions within by the MongoDB Realm app.
          */
         functions: FF;
+
+        /**
+         * Use this to call services within by the MongoDB Realm app.
+         */
+        services: Realm.Services.ServicesFactory;
 
         /**
          * The last user to log in or being switched to.

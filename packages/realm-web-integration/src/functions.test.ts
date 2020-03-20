@@ -9,7 +9,7 @@ interface TranslateFunctions extends Realm.FunctionsFactory {
 }
 
 describe("Realm.FunctionsFactory", () => {
-    it("can be called authenticate", async () => {
+    it("can be called authenticated", async () => {
         const app = createApp<TranslateFunctions>();
         // Login a user
         const credentials = Credentials.anonymous();
